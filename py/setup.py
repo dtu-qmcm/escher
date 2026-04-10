@@ -24,11 +24,14 @@ setup(
         'Topic :: Scientific/Engineering',
         'Topic :: Scientific/Engineering :: Visualization',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.11',
+        'Programming Language :: Python :: 3.12',
         'Operating System :: OS Independent'
     ],
+    python_requires='>=3.8',
     packages=find_packages(),
     include_package_data=True,
     data_files=[
@@ -46,14 +49,16 @@ setup(
         )
     ],
     install_requires=[
-        'Jinja2>=2.7.3,<3',
-        'pytest>=4.0.1,<5',
+        'Jinja2>=3.0,<4',
         'cobra>=0.5.0',
-        'jsonschema>=3.0.1,<4',
-        'ipywidgets>=7.4.0,<8',
+        'jsonschema>=3.0.1,<5',
+        'ipywidgets>=7.4.0,<9',
         'pandas>=0.18'
     ],
     extras_require={
+        'test': [
+            'pytest'
+        ],
         'docs': [
             'sphinx>=2.1.1,<3',
             'sphinx-rtd-theme>=0.4.3,<0.5',

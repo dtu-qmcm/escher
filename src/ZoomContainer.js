@@ -144,6 +144,20 @@ export default class ZoomContainer {
     // exception in node, so catch that during testing. This may be a bug with
     // d3 related to d3 using the global this.document. TODO look into this.
     this._zoomBehavior = d3Zoom()
+      .wheelDelta(() => {
+        return -event.deltaY * (event.deltaMode ? 120 : 1) / 125
+      })
+      .filter(() => {
+        if (event.type === 'wheel' || event.type === 'mousewheel' || event.type === 'DOMMouseScroll') {
+          if (this._scrollBehavior === 'pan') {
+            return event.ctrlKey
+          } else if (this._scrollBehavior === 'zoom') {
+            return true
+          }
+          return false
+        }
+        return !event.button
+      })
       .on('start', () => {
         // Prevent default zoom behavior, specifically for mobile pinch zoom
         if (event.sourceEvent !== null) {
@@ -172,19 +186,12 @@ export default class ZoomContainer {
         .on('touchend.zoom', null)
     }
 
-    // If scroll to zoom is off, then turn off these listeners
-    if (this._scrollBehavior !== 'zoom') {
-      this.container
-        .on('mousewheel.zoom', null) // zoom scroll behaviors
-        .on('DOMMouseScroll.zoom', null) // disables older versions of Firefox
-        .on('wheel.zoom', null) // disables newer versions of Firefox
-    }
-
     // add listeners for scrolling to pan
     if (this._scrollBehavior === 'pan') {
       // Add the wheel listener
       const wheelFn = () => {
         const ev = event
+        if (ev.ctrlKey) return
         const sensitivity = 0.5
         // stop scroll in parent elements
         ev.stopPropagation()

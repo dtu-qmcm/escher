@@ -178,6 +178,11 @@ class MenuBar extends Component {
             disabledButtons={disabledButtons}
           />
           <MenuButton
+            name='Auto-layout (ELK)'
+            onClick={this.props.auto_layout_elk}
+            disabledButtons={disabledButtons}
+          />
+          <MenuButton
             name={'Toggle primary/secondary' + (enableKeys ? ' (P)' : '')}
             onClick={() => this.props.togglePrimary()}
             disabledButtons={disabledButtons}

@@ -9,6 +9,7 @@ import KeyManager from './KeyManager'
 import Canvas from './Canvas'
 import * as dataStyles from './dataStyles'
 import SearchIndex from './SearchIndex'
+import { getElkAutoLayoutData } from './elkLayout'
 
 import bacon from 'baconjs'
 import _ from 'underscore'
@@ -1036,6 +1037,59 @@ export default class Map {
    */
   align_horizontal () {
     return this._align(true)
+  }
+
+  auto_layout_elk () {
+    if (this._elk_layout_running) return null
+    this._elk_layout_running = true
+
+    const savedNodes = utils.clone(this.nodes)
+    const savedReactions = utils.clone(this.reactions)
+    const savedBeziers = utils.clone(this.beziers)
+    const savedLargestIds = utils.clone(this.largest_ids)
+
+    this.set_status('Auto-layout (ELK) ...')
+
+    return getElkAutoLayoutData(this)
+      .then(out => {
+        const apply = data => {
+          this.nodes = data.nodes
+          this.reactions = data.reactions
+          this.beziers = build.newBeziersForReactions(this.reactions)
+          this.largest_ids = data.largest_ids
+          this.draw_everything()
+        }
+
+        const newData = {
+          nodes: out.nodes,
+          reactions: out.reactions,
+          beziers: build.newBeziersForReactions(out.reactions),
+          largest_ids: out.largest_ids
+        }
+
+        this.undo_stack.push(
+          () => {
+            this.nodes = utils.clone(savedNodes)
+            this.reactions = utils.clone(savedReactions)
+            this.beziers = utils.clone(savedBeziers)
+            this.largest_ids = utils.clone(savedLargestIds)
+            this.draw_everything()
+          },
+          () => {
+            apply(newData)
+          }
+        ).do()
+
+        this.set_status('Auto-layout applied', 3000)
+        this._elk_layout_running = false
+        return true
+      })
+      .catch(e => {
+        console.error(e)
+        this.set_status('Auto-layout failed', 5000)
+        this._elk_layout_running = false
+        return false
+      })
   }
 
   /**

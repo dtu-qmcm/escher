@@ -639,6 +639,7 @@ class Builder {
       redo: () => this.map.undo_stack.redo(),
       align_vertical: () => this.map.align_vertical(),
       align_horizontal: () => this.map.align_horizontal(),
+      auto_layout_elk: () => this.map.auto_layout_elk(),
       togglePrimary: () => this.map.toggle_selected_node_primary(),
       cyclePrimary: () => this.map.cycle_primary_node(),
       selectAll: () => this.map.select_all(),
