@@ -74,7 +74,7 @@ function pointsFromSections (sections) {
   return normPoints([ section.startPoint, ...bends, section.endPoint ])
 }
 
-export async function getElkAutoLayoutData (map, options) {
+export function getElkAutoLayoutData (map, options) {
   const elk = new ELK()
   const nodes = map.nodes
   const reactions = map.reactions
@@ -162,7 +162,7 @@ export async function getElkAutoLayoutData (map, options) {
     edges: elkEdges
   }
 
-  const laidOut = await elk.layout(graph)
+  return elk.layout(graph).then(laidOut => {
 
   const posByElkId = {}
   laidOut.children.forEach(n => {
@@ -292,4 +292,5 @@ export async function getElkAutoLayoutData (map, options) {
     reactions: newReactions,
     largest_ids: largestIds
   }
-
+  })
+}
