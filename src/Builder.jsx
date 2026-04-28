@@ -771,7 +771,7 @@ class Builder {
       this.map.behavior.toggleRotationMode(true) // XX
     } else {
       this.map.behavior.toggleRotationMode(mode === 'rotate') // before toggleSelectableDrag
-      this.map.behavior.toggleSelectableDrag(mode === 'brush') // XX
+      this.map.behavior.toggleSelectableDrag(mode === 'brush' || mode === 'build') // XX
     }
     this.map.behavior.toggleSelectableClick(mode === 'build' || mode === 'brush') // XX
     this.map.behavior.toggleLabelDrag(mode === 'brush') // XX
