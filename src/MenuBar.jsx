@@ -240,6 +240,11 @@ class MenuBar extends Component {
             onClick={() => this.props.toggleBeziers()}
             disabledButtons={disabledButtons}
           />
+          <MenuButton
+            name='Map theme settings...'
+            onClick={() => this.props.renderThemeMenu()}
+            disabledButtons={disabledButtons}
+          />
           <li name='divider' />
           {/* TODO use preact X to combine the following 2 blocks */}
           {fullScreenButtonEnabled &&

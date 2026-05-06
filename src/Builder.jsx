@@ -15,11 +15,13 @@ import TextEditInput from './TextEditInput'
 import * as dataStyles from './dataStyles'
 import renderWrapper from './renderWrapper'
 import SettingsMenu from './SettingsMenu'
+import ThemeMenu from './ThemeMenu'
 import MenuBar from './MenuBar'
 import SearchBar from './SearchBar'
 import ButtonPanel from './ButtonPanel'
 import TooltipContainer from './TooltipContainer'
 import DefaultTooltip from './DefaultTooltip'
+import { defaultThemeVars, buildThemeOverrideCss } from './themePresets'
 import _ from 'underscore'
 import {
   select as d3Select,
@@ -61,7 +63,10 @@ class Builder {
 
     this.map_data = mapData
     this.model_data = modelData
-    this.embeddedCss = embeddedCss
+    this.baseEmbeddedCss = embeddedCss
+    this.themePreset = 'Default'
+    this.themeVars = { ...defaultThemeVars }
+    this.embeddedCss = [ this.baseEmbeddedCss, buildThemeOverrideCss(this.themeVars) ].join('\n')
     this.selection = selection
     this.menu_div = null
     this.button_div = null
@@ -416,6 +421,7 @@ class Builder {
 
     // Set up menus
     this.setUpSettingsMenu(this.mapToolsContainer)
+    this.setUpThemeMenu(this.mapToolsContainer)
     this.setUpButtonPanel(this.mapToolsContainer)
 
     // share a parent container for menu bar and search bar
@@ -538,6 +544,10 @@ class Builder {
     this.map.callback_manager.run('pass_props_settings_menu', null, props)
   }
 
+  passPropsThemeMenu (props = {}) {
+    this.map.callback_manager.run('pass_props_theme_menu', null, props)
+  }
+
   /**
    * Initialize the settings menu
    */
@@ -571,6 +581,47 @@ class Builder {
         .map(x => _.contains(x, 'abs'))
         .skipDuplicates()
         .onValue(() => this._updateData(false, true))
+  }
+
+  setUpThemeMenu (sel) {
+    this.themeMenuRef = null
+    renderWrapper(
+      ThemeMenu,
+      instance => { this.themeMenuRef = instance },
+      passProps => this.map.callback_manager.set('pass_props_theme_menu', passProps),
+      sel.append('div').node()
+    )
+    this.passPropsThemeMenu({
+      display: false,
+      map: this.map,
+      baseCss: this.baseEmbeddedCss,
+      themePreset: this.themePreset,
+      themeVars: this.themeVars,
+      applyTheme: ({ css, preset, vars }) => {
+        const prevCss = this.embeddedCss
+        const prevPreset = this.themePreset
+        const prevVars = this.themeVars
+        const nextCss = css
+        const nextPreset = preset
+        const nextVars = vars
+
+        const undo = () => {
+          this.embeddedCss = prevCss
+          this.themePreset = prevPreset
+          this.themeVars = prevVars
+          this.map.set_css(prevCss)
+        }
+        const redo = () => {
+          this.embeddedCss = nextCss
+          this.themePreset = nextPreset
+          this.themeVars = nextVars
+          this.map.set_css(nextCss)
+        }
+
+        this.map.undo_stack.push(undo, redo)
+        redo()
+      }
+    })
   }
 
   /**
@@ -652,7 +703,12 @@ class Builder {
       full_screen: () => this.full_screen(),
       search: () => this.passPropsSearchBar({ display: true }),
       toggleBeziers: () => this.map.toggle_beziers(),
-      renderSettingsMenu: () => this.passPropsSettingsMenu({ display: true })
+      renderSettingsMenu: () => this.passPropsSettingsMenu({ display: true }),
+      renderThemeMenu: () => this.passPropsThemeMenu({
+        display: true,
+        themePreset: this.themePreset,
+        themeVars: this.themeVars
+      })
     })
 
     // redraw when beziers change

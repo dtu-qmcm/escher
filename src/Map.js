@@ -90,6 +90,7 @@ export default class Map {
 
     // set up the defs
     this.svg = svg
+    this.css = css
     this.defs = utils.setup_defs(svg, css)
 
     // make the canvas
@@ -166,6 +167,11 @@ export default class Map {
 
     // rotation mode off
     this.rotation_on = false
+  }
+
+  set_css (css) {
+    this.css = css
+    this.defs = utils.setup_defs(this.svg, css)
   }
 
   /**
